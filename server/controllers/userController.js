@@ -1,6 +1,5 @@
-import { use } from "react";
-import { generateToken } from "../../server/lib/utils";
-import User from "../../server/models/User";
+import { generateToken } from "../../server/lib/utils.js";
+import User from "../../server/models/User.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 
