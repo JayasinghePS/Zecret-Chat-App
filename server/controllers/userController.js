@@ -19,8 +19,8 @@ export const signup = async (req, res) =>{
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const newUser = await User. create({
-            fullName, email, password:hashedPassword, bio
+        const newUser = await User.create({
+            fullName, email, password: hashedPassword, bio
         });
 
         const token = generateToken(newUser._id)
@@ -33,7 +33,7 @@ export const signup = async (req, res) =>{
 }
 
 // Controller to login a user
-export const login = async (req,res) => {
+export const login = async (req, res) => {
     try {
         const {email, password} = req.body;
         const userData = await User.findOne({email})
