@@ -30,7 +30,7 @@ const LoginPage = () => {
        <img src={assets.logo_big} alt="" className='w-[min(30vw,250px)]'/>
        
        {/* right */}
-        <form onSubmit={onSubmitHandler} className='border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg' >
+        <form onSubmit={onSubmitHandler} className='border-2 bg-white/8 text-purple-500 border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg' >
           <h2 className='font-medium text-2xl flex justify-between items-center'>{currState}
             {isDataSubmitted && 
             <img onClick={()=> setIsDataSubmitted(false)} src={assets.arrow_icon} alt="" className='w-5 cursor pointer' />
@@ -38,7 +38,7 @@ const LoginPage = () => {
           </h2>
 
         {currState === "Sign up" && !isDataSubmitted && (
-          <input onChange={(e)=>setFullName(e.target.value)} value={fullName} type="text" className='p-2 border border-gray-500 rounded-md focus:outline-none' placeholder='Full Name' required/>
+          <input onChange={(e)=>setFullName(e.target.value)} value={fullName} type="text" className='p-2 border text-purple-500 border-gray-500 rounded-md focus:outline-none' placeholder='Full Name' required/>
           )}
 
           {!isDataSubmitted && (
