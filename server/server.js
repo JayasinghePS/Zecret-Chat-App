@@ -19,16 +19,18 @@ export const io = new Server(server, {
 // Store online users
 export const userSocketMap = {}; //{userId: socketId}
 
-// Socket.io connection handler
+// Socket.io connection handler (When a client connects. It passes a socket object - a unique channel between that user and the server.)
 io.on("connection", (socket)=>{
     const userId = socket.handshake.query.userId;
     console.log("User Connected", userId);
 
     if(userId) userSocketMap[userId] = socket.id;
 
-    // Emit online users to all connected clients
+    // Emit (keep track of) online users to all connected clients
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+
+    //When a user closes their tab, browser, or loses connection. The server removes them from userSocketMap. And emit updated list again
     socket.on("disconnect", ()=>{
         console.log("User Disconnect", userId);
         delete userSocketMap[userId];
@@ -37,8 +39,8 @@ io.on("connection", (socket)=>{
 })
 
 // Middleware setup
-app.use(express.json({limit: "4mb"}));
-app.use(cors());
+app.use(express.json({limit: "4mb"}));  //parse JSON request bodies.
+app.use(cors());                        //allow cross-origin requests (from frontend)
 
 //Route setup
 app.use("/api/status", (req, res)=> res.send("Server is live"));
@@ -48,6 +50,7 @@ app.use("/api/messages", messageRouter);
 // Connect to MongoDB
 await connectDB();
 
+//Run on this PORT
 if(process.env.NODE_ENV !== "production"){
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, ()=> console.log("Server is running on PORT: " + PORT));
