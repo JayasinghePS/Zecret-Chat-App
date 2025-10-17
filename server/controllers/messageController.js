@@ -19,6 +19,8 @@ export const getUsersForSidebar = async (req, res)=>{
             }
         })
         await Promise.all(promises);
+
+        //send the response
         res.json({success: true, users: filteredUsers, unseenMessages})
     } catch (error) {
         console.log(error.message);
@@ -29,17 +31,21 @@ export const getUsersForSidebar = async (req, res)=>{
 //Get all messages for selected user
 export const getMessages = async (req, res) => {
     try {
+        //Gets selectedUserId from route params and logged-in user ID from req.user.
         const{id: selectedUserId} = req.params;
         const myId = req.user._id;
 
+        //Finds all messages between these two users (both send and received)
         const messages = await Message.find({
             $or: [
                 {senderId: myId, receiverId: selectedUserId},
                 {senderId: selectedUserId, receiverId: myId},
             ]
         })
+        //Marks messages from the selected user to the logged-in user as seen: true.
         await Message.updateMany({senderId: selectedUserId, receiverId: myId}, {seen: true});
 
+        //send those messages
         res.json({success: true, messages})
 
 
@@ -52,7 +58,10 @@ export const getMessages = async (req, res) => {
 // API to mark message as seen using message id
 export const markMessageAsSeen = async (req, res)=>{
     try {
+        //Gets a message ID from URL params
         const {id} = req.params;
+
+        //find the message and make it as seen: true
         await Message.findByIdAndUpdate(id, {seen: true})
         res.json({success: true})
     } catch (error) {
@@ -64,10 +73,12 @@ export const markMessageAsSeen = async (req, res)=>{
 // Send messages to selected user
 export const sendMessage = async (req, res) =>{
     try {
+        //Gets text and image(if any), receiver ID and sender ID
         const {text, image} = req.body;
         const receiverId = req.params.id;
         const senderId = req.user._id;
 
+        //If there’s an image, uploads it to Cloudinary and gets its URL.
         let imageUrl;
         if(image){
             const uploadResponse = await cloudinary.uploader.upload(image)
