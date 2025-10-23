@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
-import axios from 'axios'
-import toast from "react-hot-toast";
+import axios from 'axios';
+import toast from "react-hot-toast"; //showing success/error messages as small popup notifications
 import { io } from "socket.io-client"
 
 const backendURL = import.meta.env.VITE_BACKEND_URL;
@@ -18,10 +18,11 @@ export const AuthProvider = ({ children })=>{
     // Check if user is authenticated and if so, set the user data and connect the socket
     const checkAuth = async ()=>{
         try {
+            //verify if the saved token is valid.
            const {data} = await axios.get("/api/auth/check");
            if (data.success) {
-            setAuthUser(data.user)
-            connectSocket(data.user)
+            setAuthUser(data.user) //so app knows the user is logged in
+            connectSocket(data.user) //open a live connection to the backend
            }
         } catch (error) {
             toast.error(error.message)
@@ -29,13 +30,13 @@ export const AuthProvider = ({ children })=>{
     }
 
     // Login function to handle user authentication and socket connection
-    const login = async (state, credentials)=>{
+    const login = async (state, credentials)=>{    //Triggered when user submits the login/register
         try {
-            const { data } = await axios.post(`/api/auth/${state}`, credentials);
+            const { data } = await axios.post(`/api/auth/${state}`, credentials); //Calls backend with credentials and receives user info + JWT token
             if (data.success){
                 setAuthUser(data.userData);
                 connectSocket(data.userData);
-                axios.defaults.headers.common["token"] = data.token;
+                axios.defaults.headers.common["token"] = data.token; //all future API calls include the token automatically
                 setToken(data.token);
                 localStorage.setItem("token", data.token);
                 toast.success(data.message)
@@ -49,6 +50,7 @@ export const AuthProvider = ({ children })=>{
 
     // Logout function to handle user logout and socket disconnection
     const logout = async () => {
+        //Removes everything related to the user from React state and browser storage
         localStorage.removeItem("token");
         setToken(null);
         setAuthUser(null);
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children })=>{
     // Update profile funstion to handle user profile updates
     const updateProfile = async (body)=>{
         try {
-            const {data} = await axios.put("/api/auth/update-profile", body);
+            const {data} = await axios.put("/api/auth/update-profile", body);           //just send data as PUT request with updated data
             if(data.success){
                 setAuthUser(data.user);
                 toast.success("Profile updated successfully")
@@ -76,25 +78,25 @@ export const AuthProvider = ({ children })=>{
         if(!userData || socket?.connected) return;
         const newSocket = io(backendURL, {
             query: {
-                userId: userData._id,
+                userId: userData._id,                   //Sends the logged-in userId as a query
             }
         });
         newSocket.connect();
         setSocket(newSocket);
 
         newSocket.on("getOnlineUsers", (userIds)=>{
-            setOnlineUsers(userIds);
+            setOnlineUsers(userIds);                    //When backend emits "getOnlineUsers" event, updates the onlineUsers list.
         })
     }
 
-    useEffect(()=>{
+    useEffect(()=>{                                                 //Runs only once when app loads
         if(token){
-            axios.defaults.headers.common["token"] = token;
+            axios.defaults.headers.common["token"] = token;         //If a token exists, adds it to axios headers
         }
         checkAuth();
     },[])
 
-    const value = {
+    const value = {    //value given in <AuthContext.Provider value={value}>
         axios,
         authUser,
         onlineUsers,
@@ -104,9 +106,10 @@ export const AuthProvider = ({ children })=>{
         updateProfile
     }
 
+    //Provides all data and functions (authUser, login, logout, socket, etc.) to the rest of your app
     return (
         <AuthContext.Provider value={value}>
-            {children}
+            {children}                                  
         </AuthContext.Provider>
     )
 }

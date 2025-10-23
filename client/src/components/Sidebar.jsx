@@ -10,15 +10,16 @@ import { useEffect } from 'react'
 const Sidebar = () => {
 
     const {getUsers, users, selectedUser, setSelectedUser, unseenMessages, setUnseenMessages} = useContext(ChatContext)
-
     const {logout, onlineUsers} = useContext(AuthContext)
 
     const [input, setInput] = useState(false)
 
-    const navigate = useNavigate();
+    const navigate = useNavigate();         //move to another route using JavaScript, you use useNavigate()
 
+    //Filters the user list based on search input, Shows only users matching what you type
     const filteredUsers = input ? users.filter((user)=>user.fullName.toLowerCase().includes(input.toLowerCase())): users;
 
+    //Calls getUsers() which fetches all users + unseenMessages from backend, so the sidebar re-syncs whenever online status changes
     useEffect(()=>{
         getUsers();
     },[onlineUsers])
@@ -30,7 +31,10 @@ const Sidebar = () => {
                 <div className='relative py-2 group'>
                     <img src={assets.menu_icon} alt='Menu' className='max-h-5 cursor-pointer'/>
                     <div className='absolute top-full right-0 z-20 w-32 p-5 rounded-md bg-[#272614] border border-gray-600 text-gray-100 hidden group-hover:block'>
-                        <p onClick={()=>navigate('/profile')} className='cursor-pointer text-sm'>Edit Profile</p>
+
+                        {/* user is redirected to /profile */}
+                        <p onClick={()=>navigate('/profile')} className='cursor-pointer text-sm'>Edit Profile</p>  
+
                         <hr className="my-2 border-t border-gray-500" />
                         <p onClick={()=> logout()} className='cursor-pointer text-sm'>Logout</p>
                     </div>
@@ -42,6 +46,9 @@ const Sidebar = () => {
             </div>
         </div>
         <div className='flex flex-col'>
+
+            {/* sets selectedUser (this causes ChatContainer and RightSidebar to render that chat)
+            sets unseenMessages for that user to 0 (resets unread badge locally) */}
             {filteredUsers.map((user, index)=>(
                 <div onClick={()=> {setSelectedUser(user); setUnseenMessages(prev =>({...prev, [user._id]:0}))}} key={index} className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${selectedUser?._id === user._id && 'bg-[#282142]/50'}`}>
                     <img src={user?.profilePic || assets.avatar_icon} alt="" className='w-[35px] aspect-[1/1] rounded-full'/>
@@ -58,6 +65,8 @@ const Sidebar = () => {
                     {unseenMessages[user._id] > 0 && <p className='absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50'>{unseenMessages[user._id]}</p>}
                 </div>
             ))}
+
+            
         </div>
     </div>
   )
