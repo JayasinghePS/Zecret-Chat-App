@@ -9,10 +9,11 @@ const LoginPage = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [bio, setBio] = useState("")
-  const [isDataSubmitted, setIsDataSubmitted] = useState(false);
+  const [isDataSubmitted, setIsDataSubmitted] = useState(false);      //2-step signup: first take name/email/password → then bio
 
   const{login} = useContext(AuthContext)
 
+  //Prevents page reload → checks if user has filled basic info → then calls login()
   const onSubmitHandler = (event)=>{
     event.preventDefault();
 
@@ -62,6 +63,7 @@ const LoginPage = () => {
             <p>Agree to the terms of use & privacy policy.</p>
           </div>
 
+          {/* Allows switching between login and signup form */}
           <div className='flex flex-col gap-2'>
             {currState === "Sign up" ? (
               <p className='text-sm text-gray-600'>Already hav an account? <span onClick={()=>{setCurrState("Login"); setIsDataSubmitted(false)}} className='font-medium text-violet-500 cursor-pointer' >Login here</span></p>

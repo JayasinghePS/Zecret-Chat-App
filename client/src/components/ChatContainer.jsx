@@ -7,31 +7,34 @@ import toast from 'react-hot-toast'
 
 const ChatContainer = () => {
 
+  //Each COMPONENT uses shared global data via React Contexts:
+      //AuthContext → handles user authentication, socket connection, and online users
+      //ChatContext → handles users, selected chat, messages, and message actions
   const {messages, selectedUser, setSelectedUser, sendMessage, getMessages} = useContext(ChatContext)
-
   const {authUser, onlineUsers} = useContext(AuthContext)
 
   const scrollEnd = useRef()
 
   const [input, setInput] = useState('');
 
-  // Handle sending a message
+  // Handle sending a message: clicking the send button (onClick={handleSendMessage}), and pressing Enter in the input (onKeyDown triggers it).
   const handleSendMessage = async (e)=>{
     e.preventDefault();
-    if(input.trim() === "") return null;
-    await sendMessage({text: input.trim()});
+    if(input.trim() === "") return null;    //if input.trim() empty → returns null
+    await sendMessage({text: input.trim()});    //ChatContext sends to backend and (on success) appends to messages
     setInput("")
   }
 
-  // Handle sending an image
+  // Handle sending an image: Called when file input changes (onChange={handleSendImage}).
   const handleSendImage = async (e) =>{
-    const file = e.target.files[0];
-    if(!file || !file.type.startsWith("image/")){
+    const file = e.target.files[0];   //Reads e.target.files[0]
+    if(!file || !file.type.startsWith("image/")){     //Validates file exists and is an image
       toast.error("select an image file")
       return;
     }
-    const reader = new FileReader();
+    const reader = new FileReader();      //Creates FileReader, reads file as DataURL (base64)
 
+    //Creates FileReader, reads file as DataURL (base64)
     reader.onloadend = async ()=>{
       await sendMessage({image: reader.result})
       e.target.value = ""
@@ -39,12 +42,14 @@ const ChatContainer = () => {
     reader.readAsDataURL(file)
   }
 
+  //If selectedUser is truthy, calls getMessages(selectedUser._1d) to fetch full chat history from backend and populate messages
   useEffect(()=>{
     if(selectedUser){
       getMessages(selectedUser._id)
     }
   },[selectedUser])
 
+  //If scrollEnd ref exists, scrolls the container so that the bottom element is visible (auto-scroll to newest message)
   useEffect(()=>{
     if(scrollEnd.current && messages){
       scrollEnd.current.scrollIntoView({behavior: "smooth"})
@@ -52,7 +57,7 @@ const ChatContainer = () => {
   },[messages])
 
   return selectedUser ? (
-    <div className=' `bg-[#8185B2]/20 h-full overflow-scroll relative backdrop-blur-lg'>
+    <div className=' bg-[#8185B2]/20 h-full overflow-scroll relative backdrop-blur-lg'>
       {/* header */}
       <div className='flex items-center gap-3 py-3 mx-4 border-b border-stone-800'>
         <img src={selectedUser.profilePic || assets.avatar_icon} alt="" className="w-8 rounded-full" />  

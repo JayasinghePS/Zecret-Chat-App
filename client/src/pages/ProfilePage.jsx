@@ -6,26 +6,37 @@ import { AuthContext } from '../../context/AuthContext';
 
 const ProfilePage = () => {
 
-  const {authUser, updateProfile} = useContext(AuthContext)
+  const {authUser, updateProfile} = useContext(AuthContext)     //authUser: the current logged-in user info, Function to updates profile
 
   const [selectedImg, setSelectedImg] = useState(null)
+
+  //Redirects user back to home page after saving.
   const navigate =  useNavigate();
+
   const [name, setName] = useState(authUser.fullName)
   const [bio, setBio] = useState(authUser.bio)
 
   const handleSubmit = async (e)=>{
+
+    //Stops the page from refreshing when form is submitted.
     e.preventDefault();
+
+    //Checks if the user didn’t choose a new image. if not only update text fields
     if(!selectedImg){
       await updateProfile({fullName: name, bio});
       navigate('/')
       return;
     }
 
+    //Creates a browser file reader
     const reader = new FileReader();
+    //Converts the selected image into a Base64 string.
     reader.readAsDataURL(selectedImg);
+
+    //Waits until file is read completely.
     reader.onload = async ()=>{
-      const base64Image = reader.result;
-      await updateProfile({profilePic: base64Image, fullName: name, bio})
+      const base64Image = reader.result;          //Stores the Base64 string of the image.
+      await updateProfile({profilePic: base64Image, fullName: name, bio})           //Sends image + updated info to backend.
       navigate('/');
       return;
     }
